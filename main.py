@@ -4,15 +4,14 @@ from flask import Flask, request, redirect
 
 app = Flask(__name__)
 
+# Имена переменных окружения должны совпадать с ключами в Render (ВЕРХНИЙ РЕГИСТР)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 APIFLASH_KEY = os.getenv("APIFLASH_KEY")
-# Замените число ниже на ваш ID из @userinfobot (без кавычек)
-MY_CHAT_ID = 5163820305
+MY_CHAT_ID = 5163820305  # Ваш ID из @userinfobot
+
 def capture_and_send(target_url):
-    # Запрос скриншота через ApiFlash
     apiflash_url = f"https://api.apiflash.com/v1/urltoimage?access_key={APIFLASH_KEY}&url={target_url}&full_page=true"
     
-    # Отправка картинки в Telegram
     telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     payload = {
         "chat_id": MY_CHAT_ID,
