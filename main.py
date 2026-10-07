@@ -10,7 +10,7 @@ APIFLASH_KEY = os.getenv("APIFLASH_KEY")
 MY_CHAT_ID = 5163820305  # Ваш ID из @userinfobot
 
 def capture_and_send(target_url):
-    apiflash_url = f"https://api.apiflash.com/v1/urltoimage?access_key={APIFLASH_KEY}&url={target_url}&full_page=true"
+    apiflash_url = f"https://api.apiflash.com/v1/urltoimage?access_key=c4678cb21c574b72b3f30c838f7c460c&wait_until=page_loaded&url=http://google.com"
     
     telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     payload = {
