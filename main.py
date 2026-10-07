@@ -7,8 +7,7 @@ app = Flask(__name__)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 APIFLASH_KEY = os.getenv("APIFLASH_KEY")
 # Замените число ниже на ваш ID из @userinfobot (без кавычек)
-MY_CHAT_ID = 123456789 
-
+MY_CHAT_ID = 5163820305
 def capture_and_send(target_url):
     # Запрос скриншота через ApiFlash
     apiflash_url = f"https://api.apiflash.com/v1/urltoimage?access_key={APIFLASH_KEY}&url={target_url}&full_page=true"
