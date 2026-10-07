@@ -1,45 +1,42 @@
 import os
-import re
-import urllib.parse
-import telebot
+import requests
+from flask import Flask, request, redirect
 
-# Получаем токены из системных переменных
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-APIFLASH_KEY = os.environ.get("APIFLASH_KEY")
+app = Flask(__name__)
 
-bot = telebot.TeleBot(BOT_TOKEN)
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+APIFLASH_KEY = os.getenv("APIFLASH_KEY")
+# Замените число ниже на ваш ID из @userinfobot (без кавычек)
+MY_CHAT_ID = 123456789 
 
-# Регулярное выражение для поиска ссылок
-URL_REGEX = r'https?://[^\s]+'
+def capture_and_send(target_url):
+    # Запрос скриншота через ApiFlash
+    apiflash_url = f"https://api.apiflash.com/v1/urltoimage?access_key={APIFLASH_KEY}&url={target_url}&full_page=true"
+    
+    # Отправка картинки в Telegram
+    telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+    payload = {
+        "chat_id": MY_CHAT_ID,
+        "photo": apiflash_url,
+        "caption": f"🔔 Кто-то перешёл по ссылке:\n{target_url}"
+    }
+    requests.post(telegram_url, data=payload)
 
-@bot.message_handler(commands=['start', 'help'])
-def send_welcome(message):
-    bot.reply_to(message, "Привет! Отправь мне ссылку (http:// или https://), и я сделаю её скриншот!")
+@app.route('/')
+def home():
+    return "Сервер редиректа работает!"
 
-@bot.message_handler(func=lambda message: True)
-def process_message(message):
-    match = re.search(URL_REGEX, message.text)
-    if not match:
-        return
+@app.route('/go')
+def redirect_and_snap():
+    target_url = request.args.get('url')
+    if target_url:
+        try:
+            capture_and_send(target_url)
+        except Exception as e:
+            print(f"Ошибка: {e}")
+        return redirect(target_url)
+    return "URL не указан", 400
 
-    url = match.group(0)
-    status_msg = bot.reply_to(message, "📸 Делаю скриншот, подождите...")
-
-    try:
-        encoded_url = urllib.parse.quote(url)
-        screenshot_api_url = f"https://api.apiflash.com/v1/urltoimage?access_key={APIFLASH_KEY}&url={encoded_url}&width=1280&height=800"
-
-        bot.send_photo(
-            chat_id=message.chat.id,
-            photo=screenshot_api_url,
-            caption=f"Скриншот страницы:\n{url}",
-            reply_to_message_id=message.message_id
-        )
-        bot.delete_message(message.chat.id, status_msg.message_id)
-
-    except Exception as e:
-        bot.edit_message_text("❌ Ошибка при создании скриншота.", message.chat.id, status_msg.message_id)
-
-if __name__ == "__main__":
-    print("Бот запущен...")
-    bot.infinity_polling()
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
